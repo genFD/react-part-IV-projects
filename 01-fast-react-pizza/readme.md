@@ -1,4 +1,4 @@
-# Application Planning, React Router
+# Application Planning, React Router, React Router data loading, Redux, Redux Toolkit, Thunks, Tailwind CSS
 
 ## Screenshots
 

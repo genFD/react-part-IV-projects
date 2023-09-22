@@ -1,6 +1,6 @@
 # React - PART IV
 
-<!-- ## React Router data loading, Redux, Redux Toolkit, thunks, Tailwind CSS
+<!-- ## React Router data loading, Redux, Redux Toolkit, Thunks, Tailwind CSS
 
 ### Fast React Pizza
 
