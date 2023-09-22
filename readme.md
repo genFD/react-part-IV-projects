@@ -1,6 +1,6 @@
 # React - PART IV
 
-## React Router data loading, Redux, Redux Toolkit, thunks, Tailwind CSS
+<!-- ## React Router data loading, Redux, Redux Toolkit, thunks, Tailwind CSS
 
 ### Fast React Pizza
 
@@ -12,14 +12,19 @@
 ### The Wild Oasis
 
 - [demo](demo)
-- [repo](repo)
+- [repo](repo) -->
 
-| Concepts                | App          | Repo | demo |
-| ----------------------- | ------------ | ---- | ---- |
-| React Router            | Quiz App     | -    | -    |
-| React Router            | WorldWise v1 | -    | -    |
-| context API             | WorldWise v2 | -    | -    |
-| memo                    | WorldWise v3 | -    | -    |
-| useMemo                 | WorldWise v4 | -    | -    |
-| useCallback             | WorldWise v5 | -    | -    |
-| Redux and Redux toolkit | Bank account | -    | -    |
+| Concepts                  | App              | Repo                                                                                    | demo                                                                                    |
+| ------------------------- | ---------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| React Router              | Fast React Pizza | [Repo](https://github.com/genFD/react-part-IV-projects/tree/main/01-fast-react-pizza)   | [Demo](https://github.com/genFD/react-part-IV-projects/tree/main/01-fast-react-pizza)   |
+| React Router data loading |                  | -                                                                                       | -                                                                                       |
+| Redux                     | -                | -                                                                                       | -                                                                                       |
+| Redux Toolkit             | -                | -                                                                                       | -                                                                                       |
+| thunks                    | -                | -                                                                                       | -                                                                                       |
+| Tailwind CSS              | -                | -                                                                                       | -                                                                                       |
+| Redux and Redux toolkit   | -                | -                                                                                       | -                                                                                       |
+| React Query               | The Wild Oasis   | [Repo](https://github.com/genFD/react-part-IV-projects/tree/main/02-The%20Wild%20Oasis) | [Demo](https://github.com/genFD/react-part-IV-projects/tree/main/02-The%20Wild%20Oasis) |
+| Styled Components         | -                | -                                                                                       | -                                                                                       |
+| React Hook Form           | -                | -                                                                                       | -                                                                                       |
+| Tailwind CSS              | -                | -                                                                                       | -                                                                                       |
+| Supabase                  | -                | -                                                                                       | -                                                                                       |
