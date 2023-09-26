@@ -127,3 +127,60 @@ To speed up the process, we've already created some components and pre-written t
 We've also moved them into the appropriate folders.
 
 ### Implementing Routes
+
+Let's install react router by running this command :
+
+```sh
+npm i react-router-dom
+```
+
+In **app.jsx**, we can start by importing `createBrowserRouter()` function from `react-router-dom`
+
+```jsx
+import { createBrowserRouter } from 'react-router-dom'
+```
+
+As the [documentation](https://reactrouter.com/en/main/routers/create-browser-router) suggests `createBrowserRouter()` takes an array of Route objects with nested routes on the children property.
+We can use `createBrowserRouter()` like so:
+
+```jsx
+createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/menu',
+    element: <Menu />,
+  },
+])
+```
+
+To use it, we can first save the result of calling `createBrowserRouter()` in a variable called `router` :
+
+```jsx
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/menu',
+    element: <Menu />,
+  },
+])
+```
+
+and then inside the **App** component, we can use the router like so:
+
+```jsx
+function App() {
+  return <RouterProvider router={router} />
+}
+```
+
+if we open up the browser, we should be able to navigate between the pages.
+
+To recap, In the new React Router v6, if we want to use the new powerful apis like `data loaders`, `data actions` or `data fetchers` we need to create a new router using the syntax above (specifying an array of objects where each object represent a route) and we pass that router as a prop to the `<ReactRouterProvider/>` component.
+
+### Building the app layout

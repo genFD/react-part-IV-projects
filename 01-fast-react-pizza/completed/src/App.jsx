@@ -1,36 +1,35 @@
-import { useEffect } from 'react'
-import Header from './components/Header'
-import Main from './components/Main'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import Home from './ui/Home'
+import Menu from './features/menu/Menu'
+import Cart from './features/cart/Cart'
+import CreateOrder from './features/order/CreateOrder'
+import Order from './features/order/Order'
 
-import { useReducer } from 'react'
-const endpoint = 'http://localhost:8000/questions'
-
-function reducer(state, action) {
-  switch (action.type) {
-  }
-}
-const initialState = {
-  questions: [],
-  // 'loading', 'error', 'ready', 'active', 'finished'
-  status: 'loading',
-}
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/menu',
+    element: <Menu />,
+  },
+  {
+    path: '/cart',
+    element: <Cart />,
+  },
+  {
+    path: '/order/new',
+    element: <CreateOrder />,
+  },
+  {
+    path: '/order/:orderId',
+    element: <Order />,
+  },
+])
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState)
-  useEffect(() => {
-    fetch(endpoint)
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.error(err))
-  }, [])
-  return (
-    <div className="app">
-      <Header />
-      <Main>
-        <p>1/15</p>
-      </Main>
-    </div>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
