@@ -99,3 +99,31 @@ As far as technology decisions :
 - for global UI state we will use **Redux**
 
 ## Application Building
+
+### Folders structure
+
+The traditional structure works great for smaller projects.
+
+Below is a sample of what a traditional structure may look like:
+![traditional-folder-structure](./completed/assets/traditional-folder-structure.png)
+
+Unfortunately, as your project grows the traditional structure falls apart. Over time code becomes harder to find, the project is harder to maintain, and there is a lot of scrolling around the project to change code for a single feature. This is where the concept of **feature folders** come in handy.
+
+This structure gives stronger guidelines to organizing projects into several folders with each folder representing a single feature.
+
+If you’re interested in reading more about best practices to structure and organize a React application, I recommend this [article](https://profy.dev/article/react-folder-structure#prototype-group-by-file-types).
+
+Let's reorganize our folders structure :
+
+![folder-structure](./completed/assets/folders-s.png)
+
+- In the **src/** folder we created a folder called **features/**.
+- We created a folder for each feature category : **user/**, **menu/**, **cart/** and **order/**
+- For reusable components (buttons, inputs etc..) : **ui/**
+- For API interactions : **api/**
+- For reusable helper functions(number or currerncy manipulation, dates etc...) : **utils/**
+
+To speed up the process, we've already created some components and pre-written the code for the helpers functions and API interactions.
+We've also moved them into the appropriate folders.
+
+### Implementing Routes
