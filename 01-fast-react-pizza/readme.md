@@ -285,3 +285,177 @@ function AppLayout() {
 With this in place we should be able to navigate between our routes like so :
 
 ![routes](<./completed/assets/ezgif.com-video-to-gif(1).gif>)
+
+### Fetching data with react router loader
+
+The idea is to have a function somewhere in our code that fetches data from an API. We then provide that loader function to one of our routes and that route will get the data on first render.
+
+Let's try and implement this, starting with the menu data. We can achieve this by following these 3 steps :
+
+1. Create a loader function
+2. Provide the loader to a route
+3. Access the data
+
+- Inside `<Menu/>` component, let's create a loader function:
+
+```jsx
+export async function loader() {
+  const menu = await getMenu()
+  return menu
+}
+```
+
+The loader is just a wrapper around the `getMenu()` function which is available inside the **api** folder.
+
+- Inside the `<App/>` component, let's provide the loader to the `<Menu/>` route:
+
+```jsx
+import Menu, { loader as MenuLoader } from './features/menu/Menu'
+
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      ...
+      {
+        path: '/menu',
+        element: <Menu />,
+        loader: menuLoader,
+      },
+    ...
+    ]
+  },
+])
+```
+
+Notice how we've imported the loader using an alias. This is because we want to avoid name collision with other loaders.
+
+Also in the menu route object we added another property called `loader` and passed in `menuLoader` as the value.
+
+- To access the data, we can use a custom hook called `useLoaderData` from `react-router-dom`. Inside `<Menu/>` component we can add this:
+
+```jsx
+function Menu() {
+  const menu = useLoaderData()
+  return <h1>Menu</h1>
+}
+```
+
+Under the hood, a new `fetch` request is fired off automatically as soon as we access the `<Menu/>` component in the browser. This is the so called `fetch-as-render` strategy. The difference between this approach and the `fetch-on-render` approach using `useEffect()` is that with `useEffect()`, we render the component first and then when the component is fully rendered we then fetch the data from the server (`data loading waterfalls`). With the `fetch-as-render` strategy, the `rendering` and the `fetching` happen at the same time
+
+With this in place, we've successfully connected the loader with the `<Menu/>` component. All we need to do is to create a list with the data received from the server.
+
+```jsx
+function Menu() {
+  const menu = useLoaderData()
+
+  return (
+    <ul>
+      {menu.map((pizza) => (
+        <MenuItem pizza={pizza} key={pizza.id} />
+      ))}
+    </ul>
+  )
+}
+```
+
+if we open up the browser we should be able to see the list like so :
+
+![List](./completed/assets/list-pizza.gif)
+
+### Displaying a loading indicator
+
+The `useNavigation()` hook from `react-router-dom` gives returns an object with a property called `state`.
+The `state` property could either be `loading` or `idle` or `submitting`. We will use that information to display the loading indicator.
+
+In the `<App>` component we can add this :
+
+```jsx
+function AppLayout() {
+  const navigation = useNavigation()
+  const isLoading = navigation.state === 'loading'
+  return (
+    <div className="layout">
+      {isLoading && <Loader />}
+      <Header />
+      <main>
+        <Outlet />
+      </main>
+
+      <CartOverview />
+    </div>
+  )
+}
+```
+
+- We called `useNavigation()` and saved it in the constant navigation
+- Created the constant loading and saved the state
+- Imported a component called `<Loader/>` that we created in in the **UI** folder
+- conditionnally render `<Loader/>` if isLoading is true.
+
+### Handling errors with Error element
+
+In the App component we can add this :
+
+```jsx
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    errorElement: <Error />,
+    children: [
+      ...
+    ],
+  },
+])
+```
+
+- We've imported the `<Error/>` component from **UI** folder.
+- Passed the the `<Error/>` component as a value of errorElement property.
+
+if we try and navigate to a page that doesn't exist, we should get a page like this :
+
+![error](./completed/assets/error.png)
+
+We can access the error object and subsequently the error message by using the `useRouteError()` hook like this :
+
+```jsx
+function Error() {
+  const navigate = useNavigate()
+  const error = useRouteError()
+
+  return (
+    <div>
+      <h1>Something went wrong 😢</h1>
+      <p>{error.data || error.message}</p>
+      <button onClick={() => navigate(-1)}>&larr; Go back</button>
+    </div>
+  )
+}
+```
+
+- we created the constant error to save the error object
+- we rendered the error message in the return statement
+
+if we try and create an artificial loading error, we should be able to see a message like this :
+
+![error](./completed/assets/loading-error.png)
+
+Because we want the `<Error/>` component to appear within the layout, we would modify the `<App/>` component like so:
+
+```jsx
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+
+    children: [
+     {
+        path: '/menu',
+        element: <Menu />,
+        loader: menuLoader,
+        errorElement: <Error />,
+    }
+      ...
+    ],
+  },
+])
+```
