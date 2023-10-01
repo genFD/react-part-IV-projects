@@ -459,3 +459,89 @@ const router = createBrowserRouter([
   },
 ])
 ```
+
+### Fetching orders
+
+The idea is to be able to read the order's id and display all the data about it on the order page. The first thing we need to do is to implement a way to search for an order. Essentialy, we want a search field in the header so that we can access the search functionality everywhere in our application.
+
+In the **features/orders** folder, we will create a component called **SearchOrder** and add this inside :
+
+```jsx
+function SearchOrder() {
+  const [query, setQuery] = useState('')
+  const navigate = useNavigate()
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!query) return
+    navigate(`order/${query}`)
+    setQuery('')
+  }
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        placeholder="Search order #"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value)
+        }}
+      />
+    </form>
+  )
+}
+```
+
+- We've created a state variable `query` to capture the user's input
+- Inside the submit handler we used the `useNavigate()` hook to navigate programmatically to the order's page
+
+Now using the `getOrder()` function in the **apiRestaurant** file, we can fetch the order just like we did in for the `<Menu>` component using `fetch-as-render` strategy.
+In the `<Order/>` component we can add this :
+
+```jsx
+
+```
+
+_How can we read the id from the link and pass it to our loader function?_
+
+We cannot use the `useParams()` hook because we can only use it in a component. Thankfully the react router team thought of this scenario. The loader function can receive an object from which we can extract the params object. Our id parameter is defined like so `path: '/order/:orderId'`, so we can read the id using the `orderId` property :
+
+```jsx
+export async function loader({ params }) {
+  const order = await getOrder(params.orderId)
+  return order
+}
+```
+
+As we did in the `<Menu/>` component, we can use the `useLoaderData()` hook to access the data :
+
+```jsx
+function Order() {
+  const order = useLoaderData()
+  return ...
+}
+```
+
+And now we can connect the `loader()` function to the route like so in the `<App/>` component like so :
+
+```jsx
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+
+    children: [
+      ...,
+      {
+        path: '/order/:orderId',
+        element: <Order />,
+        loader: orderLoader,
+      },
+    ],
+  },
+])
+```
+
+We've also added the error element in case there's any problem while fetching the order.
+
+If we open up the browser and try to fetch the order id `CQE92U` we should be able to navigate the order's page and see all the data about that order :
+
+![orderID](./completed/assets/searchorder.gif)
