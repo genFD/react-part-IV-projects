@@ -181,6 +181,107 @@ function App() {
 
 if we open up the browser, we should be able to navigate between the pages.
 
-To recap, In the new React Router v6, if we want to use the new powerful apis like `data loaders`, `data actions` or `data fetchers` we need to create a new router using the syntax above (specifying an array of objects where each object represent a route) and we pass that router as a prop to the `<ReactRouterProvider/>` component.
+To recap, in the new React Router v6, if we want to use the new powerful apis like `data loaders`, `data actions` or `data fetchers` we need to create a new router using the syntax above (specifying an array of objects where each object represent a route) and we pass that router as a prop to the `<ReactRouterProvider/>` component.
 
 ### Building the app layout
+
+The idea is to create a layout that would work on both small and large screens.
+The `<Header/>` will always be visible
+
+- Still in the **UI** folder we'll create a file called **Header.jsx** and add this in the file:
+
+```jsx
+function Header() {
+  return (
+    <header>
+      <Link to="/">Fast React Pizza Co.</Link>
+      <p>Username</p>
+    </header>
+  )
+}
+
+export default Header
+```
+
+- In the **UI** folder, we'll create a file called **AppLayout.jsx**, import the `<Header/>` and `<CartOverview/>` components and add this inside :
+
+```jsx
+function AppLayout() {
+  return (
+    <div>
+      <Header />
+      <main>
+        <h1>Content</h1>
+      </main>
+
+      <CartOverview />
+    </div>
+  )
+}
+```
+
+_How can we connect the `<AppLayout />` with all others components?_
+
+The idea is that we want all other routes to be **nested** inside `<AppLayout/>`.
+
+In the `<App/>` component, we want to add this :
+
+```jsx
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      },
+      {
+        path: '/menu',
+        element: <Menu />,
+      },
+      {
+        path: '/cart',
+        element: <Cart />,
+      },
+      {
+        path: '/order/new',
+        element: <CreateOrder />,
+      },
+      {
+        path: '/order/:orderId',
+        element: <Order />,
+      },
+    ],
+  },
+])
+```
+
+We created a route for `<AppLayout>` with only one property `children` whose value is an array of all other routes. We nested all other routes inside `<AppLayout/>`
+If we open up the browser we should see something like this :
+
+![router link](./completed/assets/link-router.png)
+
+_the `<Outlet/>` component_
+
+To render the nested routes content inside the parent route, we need to use the `<Outlet/>` component from `react-router-dom`. We can modify the `<AppLayout>` component like this :
+
+```jsx
+import { Outlet } from 'react-router-dom'
+
+function AppLayout() {
+  return (
+    <div>
+      <Header />
+      <main>
+        <Outlet />
+      </main>
+
+      <CartOverview />
+    </div>
+  )
+}
+```
+
+With this in place we should be able to navigate between our routes like so :
+
+![routes](<./completed/assets/ezgif.com-video-to-gif(1).gif>)
