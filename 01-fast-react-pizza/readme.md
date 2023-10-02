@@ -495,15 +495,11 @@ function SearchOrder() {
 - Inside the submit handler we used the `useNavigate()` hook to navigate programmatically to the order's page
 
 Now using the `getOrder()` function in the **apiRestaurant** file, we can fetch the order just like we did in for the `<Menu>` component using `fetch-as-render` strategy.
-In the `<Order/>` component we can add this :
-
-```jsx
-
-```
 
 _How can we read the id from the link and pass it to our loader function?_
 
-We cannot use the `useParams()` hook because we can only use it in a component. Thankfully the react router team thought of this scenario. The loader function can receive an object from which we can extract the params object. Our id parameter is defined like so `path: '/order/:orderId'`, so we can read the id using the `orderId` property :
+We cannot use the `useParams()` hook because we can only use it in a component.
+Thankfully the react router team thought of this scenario. The loader function can receive an object from which we can extract the params object. Our id parameter is defined like so `path: '/order/:orderId'`, so we can read the id using the `orderId` property :
 
 ```jsx
 export async function loader({ params }) {
@@ -542,6 +538,38 @@ const router = createBrowserRouter([
 
 We've also added the error element in case there's any problem while fetching the order.
 
-If we open up the browser and try to fetch the order id `CQE92U` we should be able to navigate the order's page and see all the data about that order :
+If we open up the browser and try to search the order id `CQE92U` we should be able to navigate the order's page and see all the data about that order :
 
 ![orderID](./completed/assets/searchorder.gif)
+
+### Writing data with React router `Actions`
+
+[The react router docs](https://reactrouter.com/en/main/route/action) define actions as the "writes" to route loader "reads". In other words, actions allow us to make `POST`, `PUT`, `DELETE` etc.. They provide a way for apps to perform data mutations.
+
+_How to create an order using actions?_
+
+In the `<CreateOrder/>` component, we can add this :
+
+```jsx
+
+```
+
+- We imported the `<Form/>` component from `react-router-dom` and wrapped our inputs inside.
+
+- Used the method prop and pass it the value `POST` to make a post request
+<!-- - used the action prop and pass it the path that this form should be submitted to -->
+- Created an action that will intercept the "create order" request as soon as the form is submitted. The action function accept an object from which we can extract the `request` object that contains the form data.
+
+- To connect the action function in the `<CreateOrder/>` component to the route in the `<App/>` component, we've imported the `action()` function and pass it action property of the `createOrder` route. With this in place, whenever there will be a new form submission on this path `order/new` then the action will be executed
+
+if we open the browser and submit the form, we should see the form data printed in the console:
+
+![orderID](./completed/assets/searchorder.gif)
+
+Notice how :
+
+- We did not have to create a submit handler
+- We did not have to create a state variable for each of input fiedl
+- we did not have to create a loading state
+
+Next up
