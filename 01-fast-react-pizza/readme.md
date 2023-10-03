@@ -544,20 +544,89 @@ If we open up the browser and try to search the order id `CQE92U` we should be a
 
 ### Writing data with React router `Actions`
 
-[The react router docs](https://reactrouter.com/en/main/route/action) define actions as the "writes" to route loader "reads". In other words, actions allow us to make `POST`, `PUT`, `DELETE` etc.. They provide a way for apps to perform data mutations.
+[The react router docs](https://reactrouter.com/en/main/route/action) define actions as the "writes" to route loader "reads". In other words, actions allow us to make `POST`, `PUT`, `DELETE` etc.. requests. They provide a way for apps to perform data mutations.
 
 _How to create an order using actions?_
 
 In the `<CreateOrder/>` component, we can add this :
 
 ```jsx
+//CreateOrder.jsx
+function CreateOrder() {
+  // const [withPriority, setWithPriority] = useState(false);
+  const cart = fakeCart
 
+  return (
+    <div>
+      <h2>Ready to order? Let's go!</h2>
+
+      <Form method="POST">
+        <div>
+          <label>First Name</label>
+          <input type="text" name="customer" required />
+        </div>
+
+        <div>
+          <label>Phone number</label>
+          <div>
+            <input type="tel" name="phone" required />
+          </div>
+        </div>
+
+        <div>
+          <label>Address</label>
+          <div>
+            <input type="text" name="address" required />
+          </div>
+        </div>
+
+        <div>
+          <input
+            type="checkbox"
+            name="priority"
+            id="priority"
+            // value={withPriority}
+            // onChange={(e) => setWithPriority(e.target.checked)}
+          />
+          <label htmlFor="priority">Want to yo give your order priority?</label>
+        </div>
+
+        <div>
+          <button>Order now</button>
+        </div>
+      </Form>
+    </div>
+  )
+}
+
+export async function action({ request }) {
+  const formData = await request.formData()
+  const data = Object.fromEntries(formData)
+  console.log(data)
+  return null
+}
+
+//App.jsx
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+     ...,
+      {
+        path: '/order/new',
+        element: <CreateOrder />,
+        action: createOrderAction,
+      },
+
+    ],
+  },
+])
 ```
 
 - We imported the `<Form/>` component from `react-router-dom` and wrapped our inputs inside.
 
 - Used the method prop and pass it the value `POST` to make a post request
-<!-- - used the action prop and pass it the path that this form should be submitted to -->
+
 - Created an action that will intercept the "create order" request as soon as the form is submitted. The action function accept an object from which we can extract the `request` object that contains the form data.
 
 - To connect the action function in the `<CreateOrder/>` component to the route in the `<App/>` component, we've imported the `action()` function and pass it action property of the `createOrder` route. With this in place, whenever there will be a new form submission on this path `order/new` then the action will be executed
@@ -572,4 +641,56 @@ Notice how :
 - We did not have to create a state variable for each of input fiedl
 - we did not have to create a loading state
 
-Next up
+Next up, we also want to get access to the cart data in the `action()` function. For now, we're going to use an hidden `<input/>` field so that the data will be sent during the form submission. Later on we will use `redux` to manage the state cart appropriately.
+In the `<CreateOrder/>` component, we can add this :
+
+```jsx
+function CreateOrder() {
+  // const [withPriority, setWithPriority] = useState(false);
+  const cart = fakeCart
+
+  return (
+    <div>
+      <h2>Ready to order? Let's go!</h2>
+
+      <Form method="POST">
+        ...
+        <div>
+          <input type="hidden" name="cart" value={JSON.stringify(cart)} />
+          <button>Order now</button>
+        </div>
+      </Form>
+    </div>
+  )
+}
+
+...
+
+export async function action({ request }) {
+  const formData = await request.formData()
+  const data = Object.fromEntries(formData)
+  const order = {
+    ...data,
+    cart: JSON.parse(data.cart),
+    priority: data.priority === 'on',
+  }
+  console.log(order)
+  createOrder(order)
+  return null
+}
+```
+
+- We added an input field with type `hidden` and value `cart` transformed into string because the the value prop expects a string as an a value.
+- In the action function, we created an order object which will serve as container for the data we getting from the form.
+- With this in place, we have the data in a shape that's much easier to manage but more importanty in a data type that's expected by the `createOrder()` function call.
+- As soon as the order is created, we also want to redirect the user to the new order's page. This why we used the function `redirect()` from `rect-router-dom` and passed in the path to the order's page.
+
+if we open the browser and create an order, we should be redirected to the order's page with all the information about the order :
+
+![orderID](./completed/assets/neworderredirect.gif)
+
+To recap :
+
+- Using the react router `<Form>` component, we were able to capture the data submitted by the user
+- The data is then intercepted by the action function which performs a post request to create a new order but it is also connected to the path `order/new`.
+- As soon as the user clicks on the `order now` button, the action function is executed, the user gets redirected to the new order's page populated with the data submitted using the form.
