@@ -124,9 +124,11 @@ Let's reorganize our folders structure :
 - For reusable helper functions(number or currerncy manipulation, dates etc...) : **utils/**
 
 To speed up the process, we've already created some components and pre-written the code for the helpers functions and API interactions.
-We've also moved them into the appropriate folders.
+We've also moved them into their appropriate folders.
 
-### Implementing Routes
+### React router with data loading (V6.4+)
+
+#### Implementing Routes
 
 Let's install react router by running this command :
 
@@ -183,7 +185,7 @@ if we open up the browser, we should be able to navigate between the pages.
 
 To recap, in the new React Router v6, if we want to use the new powerful apis like `data loaders`, `data actions` or `data fetchers` we need to create a new router using the syntax above (specifying an array of objects where each object represent a route) and we pass that router as a prop to the `<ReactRouterProvider/>` component.
 
-### Building the app layout
+#### Building the app layout
 
 The idea is to create a layout that would work on both small and large screens.
 The `<Header/>` will always be visible
@@ -286,7 +288,7 @@ With this in place we should be able to navigate between our routes like so :
 
 ![routes](<./completed/assets/ezgif.com-video-to-gif(1).gif>)
 
-### Fetching data with react router loader
+#### Fetching data with react router loader
 
 The idea is to have a function somewhere in our code that fetches data from an API. We then provide that loader function to one of our routes and that route will get the data on first render.
 
@@ -363,7 +365,7 @@ if we open up the browser we should be able to see the list like so :
 
 ![List](./completed/assets/list-pizza.gif)
 
-### Displaying a loading indicator
+#### Displaying a loading indicator
 
 The `useNavigation()` hook from `react-router-dom` gives returns an object with a property called `state`.
 The `state` property could either be `loading` or `idle` or `submitting`. We will use that information to display the loading indicator.
@@ -393,7 +395,7 @@ function AppLayout() {
 - Imported a component called `<Loader/>` that we created in in the **UI** folder
 - conditionnally render `<Loader/>` if isLoading is true.
 
-### Handling errors with Error element
+#### Handling errors with Error element
 
 In the App component we can add this :
 
@@ -460,7 +462,7 @@ const router = createBrowserRouter([
 ])
 ```
 
-### Fetching orders
+#### Fetching orders
 
 The idea is to be able to read the order's id and display all the data about it on the order page. The first thing we need to do is to implement a way to search for an order. Essentialy, we want a search field in the header so that we can access the search functionality everywhere in our application.
 
@@ -542,7 +544,7 @@ If we open up the browser and try to search the order id `CQE92U` we should be a
 
 ![orderID](./completed/assets/searchorder.gif)
 
-### Writing data with React router `Actions`
+#### Writing data with React router `Actions`
 
 [The react router docs](https://reactrouter.com/en/main/route/action) define actions as the "writes" to route loader "reads". In other words, actions allow us to make `POST`, `PUT`, `DELETE` etc.. requests. They provide a way for apps to perform data mutations.
 
@@ -692,5 +694,197 @@ if we open the browser and create an order, we should be redirected to the order
 To recap :
 
 - Using the react router `<Form>` component, we were able to capture the data submitted by the user
-- The data is then intercepted by the action function which performs a post request to create a new order but it is also connected to the path `order/new`.
+- The data is then intercepted by the action function which performs a post request to create a new order but it is also connected to the `CreateOrder` component in its route definition.
 - As soon as the user clicks on the `order now` button, the action function is executed, the user gets redirected to the new order's page populated with the data submitted using the form.
+
+#### Error handling in form actions
+
+The first thing we want to do is to disable the `order now` button when the user clicks on it. Once again we will use the The `useNavigation()` hook from `react-router-dom` to check if the application is in a "_submitting_" state. We will use that information to disable the button.
+
+In the `CreateOrder.jsx` component, let's add the following :
+
+```jsx
+function CreateOrder() {
+  // const [withPriority, setWithPriority] = useState(false);
+  const navigation = useNavigation()
+  const isSubmitting = navigation.state === 'submitting'
+  return (
+    ...
+    <button disabled={isSubmitting}>{isSubmitting ? 'Placing order...' : 'Order now'}</button>
+  )
+}
+```
+
+- `useNavigation()` returns an object with the current navigation, defaulting to an "idle" navigation when no navigation is in progress.
+
+- the state property can have three values : `"idle" | "loading" | "submitting"`. In our case, we're checking if the state navigation is in "submitting" state, if it's `true`, we saved the boolean value in the variable `isSubmitting`
+
+- In the return statement, we used the `disabled` attribute on the `button` element to disable the button if `isSubmitting` has a truthy value. Also, the text content will switch between "placing order..." and "Order now" depending on the value of `isSubmitting`.
+
+Let's make a test in the browser:
+
+![test-disable-button](./completed/assets/testing-place-order.gif)
+
+_How to handle errors during form submission?_
+
+For example, with the current form, it's possible to submit a text as a phone number. How do we prevent this from happening?
+We can modify our `action` function as following :
+
+```jsx
+export async function action({ request }) {
+ ...
+  const errors = {}
+  if (!isValidPhone(order.phone))
+    errors.phone = 'Please enter a valid phone. We might need it to contact you'
+  if (Object.keys.length > 0) return errors
+
+  // if everything is ok, create new order and redirect
+  ...
+}
+```
+
+- We created an `errors` object to store any errors that could occur during the form submission
+- We used the pre-defined `isValidPhone()` (can be found [here](https://uibakery.io/regex-library/phone-number)) which is a function that expects a phone number as an argument and returns true or false if the phone number is valid using regular expression.
+- In our example, we're checking if the phone number is not valid and if that is the case, we are adding a new property `phone` to the `errors` object and assigned to it the message 'Please enter a valid phone. We might need it to contact you'
+- On the next line, if the length of the object is greater than zero, which means that we have at least one error, then we will return the `errors` object.
+
+The goal here is to be able read the `errors` object from the `CreateOrder` component. To accomplish this, we will use another hooh provided by the `react-router-dom` library, called :
+`useActionData()`. Remember, the action function `createOrderAction()` is connected to `CreateOrder` in the component route definition :
+
+```jsx
+//CreateOrder.jsx
+
+
+//app.jsx
+import ... { action as createOrderAction } from './features/order/CreateOrder'
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      ...{
+        path: '/order/new',
+        element: <CreateOrder />,
+        **************************
+        action: createOrderAction,
+        **************************
+      },
+    ],
+  },
+])
+```
+
+so to access the data from the component, we can just add the following :
+
+```jsx
+//CreateOrder.jsx
+```
+
+The `useActionData()` hook will return some data including the `errors` object that contains all the errors messages that we can display in the user interface like so:
+
+```jsx
+function CreateOrder() {
+  ...
+   **********************************
+  const formErrors = useActionData()
+   **********************************
+
+  ...
+  return (
+    <div>
+      <h2>Ready to order? Let's go!</h2>
+
+      <Form method="POST">
+        ...
+        <div>
+          <label>Phone number</label>
+          <div>
+            <input type="tel" name="phone" required />
+          </div>
+          **********************************
+          {formErrors?.phone && <p className="text-red">{formErrors.phone}</p>}
+          ***********************************
+        </div>
+        ...
+      </Form>
+    </div>
+  )
+}
+```
+
+Let's test this in the browser :
+
+![test-error](./completed/assets/test-error.gif)
+
+We can see that if we try and enter some text in the phone input field, we get back the error message.
+
+That's it for react router data loading. At this point, we know how :
+
+- we can fetch data using loaders (data fetching)
+- we can write date using actions (data mutation)
+
+these are the two most important concepts in the new react-router. In the next section we will apply some style to our application using the super popular library `Tailwind CSS`
+
+### Styling the App with Tailwindd CSS
+
+#### What is Tailwindd CSS?
+
+As always, let's start this section by understanding the technology that we are going to be using. Here is the definition found on the tailwind website:
+
+> _A utility-first CSS framework packed with classes ... that can be composed to build any design, directly in your markup_.
+
+_What is utility-first approach?_
+
+The utility-first approach is about writing tiny classes with one single purpose like _flex_ or _text-center_ and then combining them to build an entire layout.
+In tailwind, all these classes are written for us.
+
+Here are some pros and cons to this approach:
+
+Pros:
+
+- We don't have to worry about class names
+- We don't have to jump between files to write markup and styles
+- It makes our UI looks better and more consistent
+- It helps us to save a lot of time
+
+Cons:
+
+- Markup looks unreadable with lots of classes
+- You will have to learn a lot of class names
+- You
+
+#### Setting up Tailwind CSS?
+
+- In the command line, let's execute this command :
+
+```sh
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+- We can then configure our template paths in `tailwind.config.js`:
+
+```js
+//tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+- finally let's add the Tailwind directives to our CSS file
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+#### Working with tailwind css
+
+All the classnames used to style our user interface are available in the docs.
+Check out this [commit]() to copy the classes for our components.
