@@ -887,4 +887,199 @@ export default {
 #### Working with tailwind css
 
 All the classnames used to style our user interface are available in the docs.
-Check out this [commit]() to copy the classes for our components.
+Check out this [commit](https://github.com/genFD/react-part-IV-projects/commit/2b19abfeccf8ce44296dbddd38d9a943a2418028) to copy the classes for our components.
+
+### Adding Redux and advanced React Router
+
+#### Setting up and connecting redux to our application
+
+As discussed in the "Application Planning" section, we will use Redux for our global state (user and cart state). But before we jump into it, let's take look at our list of requirement :
+
+> ✅ The pizza menu can change, so it **should be loaded from an API** (this part is already done!)
+
+> ✅ Once an order is placed, each **order will get an unique ID** that should be displayed so the **user can look up their order based on the ID** ✅
+
+- A very simple application where users can **order pizzas from a menu**
+- This application does not require any authentication, no users accounts and no login : **users just input their names before using the app**
+- Users can add multiple pizzas to a **cart** before ordering
+- Ordering requires the user's **name, address and phone number**
+- if possible the **GPS location** should be provided to make delivery easier
+- Users can **mark their order as priority for an additionnal 20% of the price**
+- Orders are made by sending a POST request with the order data(user data + selected pizzas) to the API
+- Payments are made on delivery, **no payment processing** is necessary
+- Users should be able to mark their order as priority **even after it has been placed**
+
+We've already implemented two features, let's move on to the user state.
+We've decided that user state will be global because the user information **will need to be accesible to all the components in the tree and the data are not fetched from an API**.
+
+let's start by running this command :
+
+```sh
+npm i @reduxjs/toolkit react-redux
+```
+
+In the **userSlice.js** file, we can add the following:
+
+```js
+import { createSlice } from '@reduxjs/toolkit'
+const initialState = {
+  userName: '',
+}
+const reducers = {
+  updateName: (state, action) => {
+    state.username = action.payload
+  },
+}
+
+const option = {
+  name: 'user',
+  initialState,
+  reducers,
+}
+const userSlice = createSlice(option)
+export const { updateName } = userSlice.actions
+
+export default userSlice.reducer
+```
+
+- The call to `createSlice(option)` will create a slice of the global state named `user`, the `initialState` and the reducer which is function that's responsible for updating the `initialState` object.
+
+- As a reminder, the reducer function takes two parameters `state` and `action` and returns the new state. In our example, we set the username to the data received from `action.payload`.
+
+- Inside `userSlice.actions` we have access to the action creator `updateName` that we've exported immediately so that we can use it in our form. We've also exported the reducer function.
+
+In the **src/** folder, we created a file `store.js` where we can configure our store like this :
+
+```js
+import { configureStore } from '@reduxjs/toolkit'
+import userReducer from './features/user/userSlice'
+
+const option = {
+  reducers: {
+    user: userReducer,
+  },
+}
+
+const store = configureStore(option)
+export default store
+```
+
+To provide the global state to our application we can add this in the **main.jsx** file:
+
+```jsx
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
+)
+```
+
+and with that, we have added `redux` to our application.
+
+In **feature/user/userName.jsx/** we can access our `userName` state by using the `useSelector()` hook and display it in the UI.
+
+```jsx
+function Username() {
+  const username = useSelector((state) => state.user.userName)
+  if (!username) return null
+  return <div className="hidden text-sm font-semibold md:block">{username}</div>
+}
+```
+
+![uiusername](./completed/src/assets/appscreenshots.png)
+
+#### Reading and updating the state
+
+One of the requirement of our application is that users should be able to just input their names before using the app. To achieve this in **feature/user/createUser.jsx/** we can add this to update our user state :
+
+```jsx
+function CreateUser() {
+  const [username, setUsername] = useState('')
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  function handleSubmit(e) {
+    e.preventDefault()
+    if (!username) return
+    dispatch(updateName(username))
+    setUsername('')
+    navigate('/menu')
+  }
+}
+```
+
+- It's not a good practice to connect the redux store directly to the input, that's the reason why we creatd a local `username` state, to save the value entered by the user.
+
+- When the user submit the form, we dispatched the `updateName()` action creator to update the store with the value saved in the local state : `dispatch(updateName(username))` and redirect the user back to the menu : `navigate('/menu')`.
+
+![userName appear on home page and redirect to menu](./completed/src/assets/appscreenshots.png)
+
+- Also, we want to conditionnally rendered the form only if there's no user in the redux store. This is why in the **ui/home.jsx** we added this :
+
+```jsx
+function Home() {
+  const username = useSelector((state) => state.user.userName) // read username from redux store
+  return (
+    <div className="my-10 px-4 text-center sm:my-16 ">
+      ...
+      {username === '' ? ( // conditionally rendered CreateUser or Button
+        <CreateUser />
+      ) : (
+        <Button to="/menu" type="primary">
+          Continue ordering, {username}
+        </Button>
+      )}
+    </div>
+  )
+}
+```
+
+- We also need to read the `username` in the cart :
+
+```jsx
+//Cart.jsx
+function Cart() {
+  const cart = fakeCart
+  const username = useSelector((state) => state.user.userName)
+
+  return (
+    <div className=" px-4 py-3">
+      <LinkButton to="/menu">&larr; Back to menu</LinkButton>
+      <h2 className=" mt-7 text-xl font-semibold">Your cart,{username}</h2>
+      ...
+    </div>
+  )
+}
+```
+
+- and finally in `CreateOrder.jsx` component :
+
+```jsx
+function CreateOrder() {
+  // const [withPriority, setWithPriority] = useState(false);
+  const username = useSelector((state) => state.user.userName)
+  ...
+
+  return (
+    <div className="px-4 py-6">
+      <h2 className="mb-8 text-xl font-semibold">Ready to order? Let's go!</h2>
+      <Form method="POST">
+        <div className=" mb-5 flex flex-col gap-2  sm:flex-row sm:items-center">
+          <label className="sm:basis-40">First Name</label>
+          <input
+            defaultValue={username}
+            className="input grow"
+            type="text"
+            name="customer"
+            required
+          />
+        </div>
+        ...
+  )
+}
+```
+
+- Notice how we used the default value prop for the username input. This is because we want to be able to override the value of the input field. The default value prop allows us to set a default value for the input field that we can change unlike a controlled element.
+
+Let's try this in the browser :
