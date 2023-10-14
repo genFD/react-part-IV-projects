@@ -1083,3 +1083,67 @@ function CreateOrder() {
 - Notice how we used the default value prop for the username input. This is because we want to be able to override the value of the input field. The default value prop allows us to set a default value for the input field that we can change unlike a controlled element.
 
 Let's try this in the browser :
+
+#### Modeling the `Cart` state
+
+In the **features/cart** folder we created a file called `cartSlice.js`.
+We added this in the file :
+
+```jsx
+import { createSlice } from '@reduxjs/toolkit'
+
+const fakePizzaOrder = {
+  pizzaId: 12,
+  name: 'Medit',
+  quantity: 2,
+  unitPrice: 16,
+  totalPrice: 32,
+}
+const initialState = {
+  cart: [fakePizzaOrder],
+}
+const options = {
+  name: 'cart',
+  initialState,
+  reducers: {
+    addItem: (state, action) => {
+      //payload = newItem
+      state.cart.push(action.payload)
+    },
+    deleteItem: (state, action) => {
+      //payload = item.id
+
+      state.cart = state.cart.filter((item) => item.pizzaId !== action.payload)
+    },
+    clearCart: (state) => {
+      state.cart = []
+    },
+    increaseItemsQuantity: (state, action) => {
+      //payload = item.id
+      const item = state.cart.find((item) => item.pizzaId === action.payload)
+      item.quantity++
+      item.totalPrice = item.quantity * item.unitPrice
+    },
+    decreaseItemsQuantity: (state, action) => {
+      //payload = item.id
+      const item = state.cart.find((item) => item.pizzaId === action.payload)
+      item.quantity--
+      item.totalPrice = item.quantity * item.unitPrice
+    },
+  },
+}
+const cartSlice = createSlice(options)
+
+export const {
+  addItem,
+  deleteItem,
+  clearCart,
+  increaseItemsQuantity,
+  decreaseItemsQuantity,
+} = cartSlice.actions
+
+export default cartSlice.reducer
+```
+
+- We created a fake order just to have an idea of the shape of each cart items.
+- Our `initialState` has only
