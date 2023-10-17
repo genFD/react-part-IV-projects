@@ -14,7 +14,7 @@
 
 ### Screenshot
 
-![Design preview](./Wild-oasis.png)
+![Design preview](./completed/wild-oasis.png)
 
 ### Links
 

@@ -1,19 +1,42 @@
-# Application Planning, React Router, React Router data loading, Redux, Redux Toolkit, Thunks, Tailwind CSS
-
-## Screenshots
-
-![Sccht](./completed/src/assets/appscreenshots.png)
+# Fast React Pizza - Application Planning, React Router, React Router data loading, Redux, Redux Toolkit, Thunks, Tailwind CSS
 
 ## Table of contents
 
-- [Application planning](#application-planning)
-- [Guidelines](#how-do-you-plan-and-build-a-professional-react-application)
-- [Planning Pizza and co](#how-to-apply-these-guidelines-to-our-application)
-- [Application Building](#application-planning)
+- [💻 Application Overview](#application-overview)
+  - [📸Screenshot](#screenshot)
+  - [🔗Links](#links)
+- [Built with](#built-with)
+- [📕 What I learned](#what-i-learned)
+- [⏭️ Continued development](#continued-development)
+- [📚 Useful resources](#useful-resources)
+
+### Application Overview
+
+### Screenshot
+
+![Design preview](./completed/fast-react-pizza.png)
+
+### Links
+
+- Live Site URL: [Wild-oasis](https://code-journey-projects-css-flexbox.vercel.app/)
+
+## Built with
+
+**Frontend** :
+
+- React Query
+- Styled Components
+- React Hook Form
+
+**Backend**:
+
+- Supabase
+
+## What I learned
 
 ## Application Planning
 
-### _How do you plan and build a professional react application?_
+### How do you plan and build a professional react application?
 
 The overarching goal with this application is to **allow users to order pizzas and get them delivered** to their home.
 
@@ -1147,3 +1170,7 @@ export default cartSlice.reducer
 
 - We created a fake order just to have an idea of the shape of each cart items.
 - Our `initialState` has only
+
+## Continued development
+
+## Useful resources
